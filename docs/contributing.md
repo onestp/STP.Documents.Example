@@ -7,16 +7,18 @@ We'd love to accept your patches and contributions to this project.
 ### Sign our Contributor License Agreement
 
 Contributions to this project must be accompanied by a
-[Contributor License Agreement](https://cla.stp-online.de/) (CLA).
+[Contributor License Agreement](https://TODO.INSERT.LINK) (CLA).
 You (or your employer) retain the copyright to your contribution; this simply
 gives us permission to use and redistribute your contributions as part of the
 project.
 
-If you or your current employer have already signed the STP CLA (even if it
-was for a different project), you probably don't need to do it again.
+You will be asked to sign the CLA when creating a pull request. Please read 
+the instructions of the [contributor-assistant](https://github.com/contributor-assistant/github-action) 
+bot and comment with 
+ "I have read the CLA Document and I hereby sign the CLA" if you consent.
 
-Visit <https://cla.stp-online.de/> to see your current agreements or to
-sign a new one.
+ You will only be asked to sign the CLA on the first PR or if the CLA has
+ changed.
 
 ### Review our Community Guidelines
 
