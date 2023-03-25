@@ -13,6 +13,11 @@ This folder contains example code for how to communicate with the DMS server fro
 This folder contains example code for how to communicate with the DMS server from a client application. It uses the LCAS as a client proxy.
 
 
-## Cloud (coming soon)
+## Cloud.Channel.OnPremise (coming soon)
 
-This folder contains example code for how to communicate with DMS over the Cloud. It uses the STP.Documents.Channel.OnPremise service (DMS Mobile DESK uses it too) to communicate with the DMS server.
+This folder contains example code for how to communicate with the DMS over the cloud. It uses the STP.Documents.Channel.OnPremise service (DMS Mobile DESK uses it too) to establish and end-to-end encrypted connection to the DMS server.
+
+
+## Cloud.Store
+
+This folder contains example code for how to store, manage and retrieve documents in the cloud.

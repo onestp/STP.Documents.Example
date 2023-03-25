@@ -5,6 +5,8 @@ VisualStudioVersion = 17.1.32407.343
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "STP.Documents.Examples.OnPremise.Server", "OnPremise.Server\STP.Documents.Examples.OnPremise.Server.csproj", "{0B111C81-EA8E-4322-BC46-C512728324F9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STP.Documents.Examples.Cloud.Store", "Cloud.Store\STP.Documents.Examples.Cloud.Store.csproj", "{A5B1938D-8861-4027-8CCA-8CCEC6DA9C9B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0B111C81-EA8E-4322-BC46-C512728324F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B111C81-EA8E-4322-BC46-C512728324F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B111C81-EA8E-4322-BC46-C512728324F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5B1938D-8861-4027-8CCA-8CCEC6DA9C9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5B1938D-8861-4027-8CCA-8CCEC6DA9C9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5B1938D-8861-4027-8CCA-8CCEC6DA9C9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5B1938D-8861-4027-8CCA-8CCEC6DA9C9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
