@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>STP.Documents.Examples.OnPremise.Server</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LEXolution.DMS.ApiCore" Version="2022.11.28.115" />
+    <PackageReference Include="STP.Documents.OnPremise.Server.Api" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>

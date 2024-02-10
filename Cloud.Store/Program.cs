@@ -3,7 +3,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using STP.Documents.Client;
-using STP.Documents.Client.Store.Search;
+using STP.Documents.Client.Store;
+using STP.Documents.Client.Store.Locate;
 using STP.Documents.Client.Store.Upload;
 using STP.UserManagement.Identity.Client;
 using System.Diagnostics;
@@ -15,8 +16,8 @@ using (var serviceScope = host.Services.CreateScope())
 	var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
 	try
 	{
-		var documentsClient = serviceProvider.GetRequiredService<IDocumentsClient>();
-		var matter = (await documentsClient.FindContexts(searchTerm: "m1")).ToList() switch
+		var documentsClient = serviceProvider.GetRequiredService<IDocumentsStoreClient>();
+		var matter = (await documentsClient.FindContexts(searchTerm: "m1")).Items.ToList() switch
 		{
 			[var first, ..] => first,
 			[] => await documentsClient.CreateContext(new NewContextDto(ContextType.Matter)
@@ -31,7 +32,7 @@ using (var serviceScope = host.Services.CreateScope())
 		logger.LogInformation("Uploaded {File} as Document {Document} to matter {Matter}.", document.Name, uploaded.DocumentId, connected);
 
 		var documentsOfMatter = await documentsClient.Resolve(matter);
-		var uploadedDocumentIsAmongMatterDocuments = documentsOfMatter.Contains(uploaded.DocumentId);
+		var uploadedDocumentIsAmongMatterDocuments = documentsOfMatter.Ids.Contains(uploaded.DocumentId);
 		logger.LogInformation($"Document {{Document}} {(uploadedDocumentIsAmongMatterDocuments ? "is" : "is not")} among {documentsOfMatter.Count} documents of {{Matter}}.", uploaded.DocumentId, connected);
 
 		var downloadedStream = await documentsClient.Download(uploaded);
