@@ -2,6 +2,7 @@
 using STP.Ecm.Dto.Container;
 using STP.Ecm.Dto.Document;
 using STP.Ecm.Dto.Topics;
+using STP.Lsb;
 
 var config = new Config();
 var dms = new Dms(config);
@@ -100,4 +101,11 @@ public class Config : ILsbConfiguration
 	public string RabbitMqPassword { get; set; } = "";
 	public string UmServerUser { get; set; } = "";
 	public string UmPassword { get; set; } = "";
+
+	public string PersistentIdentifier { get; set; } = null!;
+	public int PersistentPrefetchCount { get; set; }
+	public string TransientIdentifier { get; set; } = null!;
+	public int TransientPrefetchCount { get; set; }
+	public bool UsePersistentQueue { get; set; }
+	public LsbRetryMode PersistentRetryMode { get; set; }
 }
