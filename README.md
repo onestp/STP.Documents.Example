@@ -9,3 +9,7 @@ This folder contains example code for how to communicate with the DMS server fro
 ## Universal
 
 This folder contains example code for how to store, manage and retrieve documents in the cloud via the Universal API.
+
+## MCP
+
+This folder contains example code for how to connect with the STP.Documents MCP server.
