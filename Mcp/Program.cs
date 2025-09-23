@@ -2,10 +2,14 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using ModelContextProtocol.Authentication;
 using ModelContextProtocol.Client;
 using Serilog;
-using STP.UserManagement.Identity.Client;
-using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.Net;
+using System.Text;
+using System.Web;
 
 var host = Setup().Build();
 using (var serviceScope = host.Services.CreateScope())
@@ -14,14 +18,20 @@ using (var serviceScope = host.Services.CreateScope())
 	var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
 	try
 	{
-		//get the authenticated http client from the service provider
 		var http = serviceProvider.GetRequiredService<HttpClient>();
+		var config = serviceProvider.GetRequiredService<IConfiguration>();
 
 		//create the mcp client
 		await using var mcpClient = await McpClientFactory.CreateAsync(new SseClientTransport(new()
 		{
 			Name = "STP.Documents",
-			Endpoint = new Uri(serviceProvider.GetRequiredService<IConfiguration>()["Backend:McpServer"]!),
+			Endpoint = new Uri(config["Backend:McpServer"]!),
+			OAuth = new ClientOAuthOptions
+			{
+				ClientId = config["Backend:ClientId"],
+				RedirectUri = new Uri(config["Backend:RedirectUri"]!),
+				AuthorizationRedirectDelegate = HandleAuthorizationUrlAsync,
+			}
 		}, http));
 
 		//list mcp tools and engage...
@@ -59,44 +69,99 @@ static IHostBuilder Setup()
 		})
 		.ConfigureServices((ctx, services) =>
 		{
-			// Setup for STP.Identity
-			services.AddTransient<SetStpSubdomainHeader>();
-			services.AddTransient<SetAccessToken>();
-
-			services.AddSingleton<ITokenCache>(sp => //or just TokenCache for in-memory caching
-			{
-				var useProtection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-				if (!useProtection)
-				{
-					var logger = sp.GetRequiredService<ILogger<Program>>();
-					logger.LogWarning("Windows DPAPI is not available, therefore your access token cache file is not encrypted!");
-				}
-
-				return new TokenCacheFile($"./stp-doc-example-{new Uri(ctx.Configuration["Backend:Authority"]!).Host.Replace(".", "")}.tokens", useProtection);
-			});
-
-			if (string.Equals(ctx.Configuration["Backend:ClientType"], "device", StringComparison.InvariantCultureIgnoreCase))
-			{
-				services.AddSingleton<DeviceCredentials.AuthorizeCallback, DeviceCredentials.AuthorizeCallback.InConsole>();
-				services.AddHttpClient<ITokenProvider, DeviceCredentials>();
-			}
-			else if (string.Equals(ctx.Configuration["Backend:ClientType"], "password", StringComparison.InvariantCultureIgnoreCase))
-			{
-				services.AddHttpClient<ITokenProvider, ResourceOwnerPasswordCredentials>().AddHttpMessageHandler<SetStpSubdomainHeader>();
-			}
-			else if (string.Equals(ctx.Configuration["Backend:ClientType"], "client_credentials", StringComparison.InvariantCultureIgnoreCase))
-			{
-				services.AddHttpClient<ITokenProvider, ClientCredentials>().AddHttpMessageHandler<SetStpSubdomainHeader>();
-			}
-			else
-			{
-				throw new ArgumentOutOfRangeException("Backend:ClientType", ctx.Configuration["Backend:ClientType"], "unknown value");
-			}
-
-			services.Configure<TokenProviderOptions>(ctx.Configuration.GetSection("Backend"));
-			services.Configure<StpSubdomainHeaderOptions>(ctx.Configuration.GetSection("Backend"));
-
-			// Set the access token handler to the default http client
-			services.AddHttpClient("").AddHttpMessageHandler<SetAccessToken>();
+			services.AddHttpClient();
 		});
+}
+
+
+
+
+
+
+
+//Taken from https://github.com/modelcontextprotocol/csharp-sdk/blob/main/samples/ProtectedMCPClient/Program.cs:
+/// <summary>
+/// Handles the OAuth authorization URL by starting a local HTTP server and opening a browser.
+/// This implementation demonstrates how SDK consumers can provide their own authorization flow.
+/// </summary>
+/// <param name="authorizationUrl">The authorization URL to open in the browser.</param>
+/// <param name="redirectUri">The redirect URI where the authorization code will be sent.</param>
+/// <param name="cancellationToken">The cancellation token.</param>
+/// <returns>The authorization code extracted from the callback, or null if the operation failed.</returns>
+static async Task<string?> HandleAuthorizationUrlAsync(Uri authorizationUrl, Uri redirectUri, CancellationToken cancellationToken)
+{
+	Console.WriteLine("Starting OAuth authorization flow...");
+	Console.WriteLine($"Opening browser to: {authorizationUrl}");
+
+	var listenerPrefix = redirectUri.GetLeftPart(UriPartial.Authority);
+	if (!listenerPrefix.EndsWith("/")) listenerPrefix += "/";
+
+	using var listener = new HttpListener();
+	listener.Prefixes.Add(listenerPrefix);
+
+	try
+	{
+		listener.Start();
+		Console.WriteLine($"Listening for OAuth callback on: {listenerPrefix}");
+
+		OpenBrowser(authorizationUrl);
+
+		var context = await listener.GetContextAsync();
+		var query = HttpUtility.ParseQueryString(context.Request.Url?.Query ?? string.Empty);
+		var code = query["code"];
+		var error = query["error"];
+
+		string responseHtml = "<html><body><h1>Authentication complete</h1><p>You can close this window now.</p></body></html>";
+		byte[] buffer = Encoding.UTF8.GetBytes(responseHtml);
+		context.Response.ContentLength64 = buffer.Length;
+		context.Response.ContentType = "text/html";
+		context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+		context.Response.Close();
+
+		if (!string.IsNullOrEmpty(error))
+		{
+			Console.WriteLine($"Auth error: {error}");
+			return null;
+		}
+
+		if (string.IsNullOrEmpty(code))
+		{
+			Console.WriteLine("No authorization code received");
+			return null;
+		}
+
+		Console.WriteLine("Authorization code received successfully.");
+		return code;
+	}
+	catch (Exception ex)
+	{
+		Console.WriteLine($"Error getting auth code: {ex.Message}");
+		return null;
+	}
+	finally
+	{
+		if (listener.IsListening) listener.Stop();
+	}
+}
+
+/// <summary>
+/// Opens the specified URL in the default browser.
+/// </summary>
+/// <param name="url">The URL to open.</param>
+static void OpenBrowser(Uri url)
+{
+	try
+	{
+		var psi = new ProcessStartInfo
+		{
+			FileName = url.ToString(),
+			UseShellExecute = true
+		};
+		Process.Start(psi);
+	}
+	catch (Exception ex)
+	{
+		Console.WriteLine($"Error opening browser. {ex.Message}");
+		Console.WriteLine($"Please manually open this URL: {url}");
+	}
 }
