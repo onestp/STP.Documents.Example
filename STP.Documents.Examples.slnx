@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Mcp/STP.Documents.Examples.Mcp.csproj" />
+  <Project Path="OnPremise.Server/STP.Documents.Examples.OnPremise.Server.csproj" />
+  <Project Path="Universal/STP.Documents.Examples.Universal.csproj" />
+</Solution>

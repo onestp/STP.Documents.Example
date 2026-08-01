@@ -360,3 +360,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Cached OAuth tokens of the MCP example
+*.token
+
+# Local credentials and endpoint overrides of the examples
+appsettings.local.json

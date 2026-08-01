@@ -101,6 +101,7 @@ public class Config : ILsbConfiguration
 	public string RabbitMqPassword { get; set; } = "";
 	public string UmServerUser { get; set; } = "";
 	public string UmPassword { get; set; } = "";
+	public string LicenseString { get; set; } = "";
 
 	public string PersistentIdentifier { get; set; } = null!;
 	public int PersistentPrefetchCount { get; set; }
@@ -108,4 +109,5 @@ public class Config : ILsbConfiguration
 	public int TransientPrefetchCount { get; set; }
 	public bool UsePersistentQueue { get; set; }
 	public LsbRetryMode PersistentRetryMode { get; set; }
+	public int MaxRetriesForDocumentDownload { get; set; }
 }
